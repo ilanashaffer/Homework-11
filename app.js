@@ -5,7 +5,7 @@ var path = require("path");
 var port = process.env.PORT || 7000;
 var notes = require("./Develop/db/db.json");
 
-var idNumber = 5;
+var idNumber = 1;
 
 
 // Sets up the Express app to handle data parsing
@@ -30,46 +30,71 @@ app.get("/notes", function(req, res){
 //see
 app.get("/api/notes", function(req, res){
 
-    res.json(notes);
+    fs.readFile("./Develop/db/db.json", function (err, data) {
+        if (err) throw err;
+        console.log("App.get: read file");
+        res.json(JSON.parse(data));
+    })
 });
 
 //save
 app.post("/api/notes", function(req, res){
-    
-    const newNote = {
-
-        id: idNumber,
-        title: req.body.title,
-        text: req.body.text
-
-    };
-
-    idNumber++;
-    
-    notes.push(newNote);
-
-    fs.writeFile("./Develop/db/db.json", JSON.stringify(notes), function (err){
+    console.log(req);
+    fs.readFile("./Develop/db/db.json", function (err, data) {
         if (err) throw err;
 
-        console.log("New note added");
+        const newNote = {
+
+            id: idNumber,
+            title: req.body.title,
+            text: req.body.text
+    
+        };
+
+        console.log(data);
+        
+        var updatedNotes = JSON.parse(data);
+
+        updatedNotes.push(newNote);
+    
+        console.log(updatedNotes);
+
+        idNumber++;
+        
+        fs.writeFile("./Develop/db/db.json", JSON.stringify(updatedNotes), function (err, data){
+            if (err) throw err;
+            console.log("App.post: note saved.");
+
+            res.json(newNote);
+        });
+
     });
-
-    res.json(notes);
-
 
 });
 
 // delete
 app.delete("/api/notes/:id", function(req, res){
     // delete note according to id
+    console.log(req.params.id);
 
-    const updatedNotes = notes.filter(note => note.id !== parseInt(req.params.id));
-
-    fs.writeFile("./Develop/db/db.json", JSON.stringify(updatedNotes), function (err){
+    fs.readFile("./Develop/db/db.json", function (err, data) {
         if (err) throw err;
+        console.log("App.delete: read file");
 
-        res.json(updatedNotes);
-        console.log("Note deleted");
+        var updatedNotes1 = JSON.parse(data);
+
+        var updatedNotes2 = updatedNotes1.filter(item => item.id !== parseInt(req.params.id));
+
+        console.log(updatedNotes2);
+    
+        fs.writeFile("./Develop/db/db.json", JSON.stringify(updatedNotes2), function (err){
+            if (err) throw err;
+
+            console.log("App.delete: note deleted");
+
+            res.json(updatedNotes2);
+        });
+
     });
 
 });
