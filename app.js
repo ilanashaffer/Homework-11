@@ -3,7 +3,6 @@ var app = express();
 var fs = require("fs");
 var path = require("path");
 var port = process.env.PORT || 7000;
-var notes = require("./Develop/db/db.json");
 
 var idNumber = 1;
 
